@@ -2,7 +2,11 @@ import sqlite3
 import os
 import threading
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shop.db")
+# База хранится в /app/data (DATA_DIR) на хостинге, чтобы не теряться при рестарте.
+# Локально при отсутствии переменной — в папке проекта.
+_DATA_DIR = os.getenv("DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
+os.makedirs(_DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(_DATA_DIR, "shop.db")
 
 _lock = threading.Lock()
 
