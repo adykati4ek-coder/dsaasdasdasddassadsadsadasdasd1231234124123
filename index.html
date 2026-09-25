@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>mont1g3m's shop — маркетплейс MM2 · Adopt Me</title>
+<style>
+  :root{
+    --theme-bg:#f5f6fb;--theme-bg-elem:#efeffa;--theme-card:#ffffff;
+    --theme-line:#e9eaf2;--theme-ink:#1c1c28;--theme-muted:#76768c;
+    --theme-accent-soft:#f0eefe;
+    --bg:#f5f6fb;--card:#ffffff;--line:#e9eaf2;
+    --accent:#6c5ce7;--accent-dark:#5a48d6;--accent-soft:#f0eefe;
+    --ink:#1c1c28;--muted:#76768c;--green:#2ecc71;--red:#ef5350;--rad:16px;
+    --shadow:0 4px 18px rgba(30,22,80,.06);
+  }
+  html[data-theme="dark"]{
+    --theme-bg:#0f0e16;--theme-bg-elem:#1a1924;--theme-card:#171623;
+    --theme-line:#26243a;--theme-ink:#ecebf5;--theme-muted:#a29cbf;
+    --theme-accent-soft:rgba(108,92,231,.18);
+    --bg:#0f0e16;--card:#171623;--line:#26243a;
+    --accent:#8a7cf5;--accent-dark:#9a8dfa;--accent-soft:rgba(108,92,231,.18);
+    --ink:#ecebf5;--muted:#a29cbf;--green:#3fdc85;--red:#ff7a7a;
+    --shadow:0 4px 18px rgba(0,0,0,.35);
+  }
+
+  /* плавный перекрас темы (только фон+цвет, без box-shadow — чтобы не тормозило) */
+  body,.topbar,.fltbar,.card,.form-card,.float-isle,.searchbar input,input,textarea,.tb-nav,.segs,.tbn,.fill,.hint-card,.uppic{transition:background-color .3s ease,color .3s ease,border-color .3s ease}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter','Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+  .wrap{max-width:1220px;margin:0 auto;padding:0 20px}
+
+  /* topbar */
+  .topbar{position:sticky;top:0;z-index:50;background:var(--theme-bg);border-bottom:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .topbar-inner{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:18px;height:64px;flex-wrap:wrap}
+  .tb-row{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem;white-space:nowrap;color:var(--ink);flex-shrink:0}
+  .logo .mark{width:32px;height:32px;border-radius:9px;overflow:hidden;display:grid;place-items:center}
+  .logo .mark img{width:100%;height:100%;object-fit:cover;display:block}
+  .tb-nav{display:flex;gap:4px;background:var(--theme-bg-elem);border:1px solid var(--line);padding:4px;border-radius:12px;flex-shrink:0;position:relative}
+  .tbn{border:none;background:transparent;padding:9px 16px;border-radius:9px;font-size:.88rem;font-weight:600;color:var(--muted);transition:color .25s,transform .15s;display:flex;align-items:center;gap:7px;position:relative;z-index:1}
+  .tbn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .tbn:hover{color:var(--accent)}
+  .tbn:active{transform:scale(.96)}
+  .tbn.active{color:#fff}
+  .slide-thumb{position:absolute;z-index:0;top:0;left:0;background:var(--accent);box-shadow:0 3px 10px rgba(108,92,231,.4);border-radius:9px;transition:transform .32s cubic-bezier(.2,.7,.3,1),width .32s cubic-bezier(.2,.7,.3,1),height .32s cubic-bezier(.2,.7,.3,1);pointer-events:none}
+  .searchbar{flex:1;max-width:520px;min-width:200px;position:relative;margin-left:auto}
+  .searchbar svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted);pointer-events:none}
+  .searchbar input{width:100%;height:42px;padding:0 14px 0 40px;border-radius:12px;background:var(--theme-bg-elem);border:1px solid var(--line);color:var(--ink);font-size:.92rem;transition:.2s}
+  .searchbar input:focus{outline:none;background:var(--card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .tb-user{flex-shrink:0}
+  .user-chip{display:flex;align-items:center;gap:9px;padding:4px 12px 4px 4px;border-radius:999px;background:var(--theme-bg-elem);border:1px solid var(--line);transition:.18s}
+  .user-chip:hover{border-color:var(--accent);background:var(--card)}
+  .user-chip .uc-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a29bfe);display:grid;place-items:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
+  .user-chip img{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0}
+  .user-chip .uc-name{font-size:.85rem;font-weight:700;line-height:1.1;color:var(--ink)}
+  .user-chip .uc-sub{font-size:.68rem;color:var(--muted);line-height:1.1}
+  @media(max-width:640px){.logo b{display:none}.user-chip .uc-name,.user-chip .uc-sub{display:none}.user-chip{padding:4px;border-radius:50%}}
+
+  /* floating island (theme + fav) */
+  .float-isle{
+    position:fixed;right:18px;bottom:18px;z-index:70;
+    display:flex;flex-direction:column;gap:10px;
+    padding:10px;border-radius:22px;
+    background:var(--card);border:1px solid var(--line);
+    box-shadow:0 14px 40px rgba(0,0,0,.18);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  }
+  .fi-btn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;border:none;background:var(--theme-bg-elem);position:relative;transition:.18s;cursor:pointer}
+  .fi-btn:hover{background:var(--accent-soft)}
+  .fi-btn svg{width:21px;height:21px;stroke:var(--accent);fill:none;stroke-width:1.9}
+  .fi-btn.heart svg{fill:none}
+  .fi-btn.heart.on svg{fill:#ff5b5b;stroke:#ff5b5b}
+  .fi-btn .cnt{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:.64rem;font-weight:700;display:none;place-items:center;border:2px solid var(--card)}
+  .fi-btn .cnt.show{display:grid}
+
+  /* theme wave overlay */
+  .theme-wave{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:999;pointer-events:none;will-change:clip-path}
+
+  /* sort/filter bar in topbar */
+  .fltbar{max-width:1220px;margin:0 auto;padding:0 20px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .fltbar h1{font-size:1.05rem;font-weight:800}
+  .fltbar .count{color:var(--muted);font-size:.82rem}
+  .fltbar .segs{margin-left:auto}
+  .segs{display:flex;gap:4px;background:var(--theme-bg-elem);border:1px solid var(--line);padding:4px;border-radius:11px;flex-wrap:wrap;position:relative}
+  .seg{border:none;background:transparent;padding:8px 13px;border-radius:8px;font-size:.84rem;font-weight:500;color:var(--muted);cursor:pointer;transition:transform .12s;position:relative;z-index:1}
+  .seg:hover{color:var(--accent)}
+  .seg:active{transform:scale(.94)}
+  .seg.active{background:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(108,92,231,.4)}
+
+  html,body{height:auto;min-height:100%}
+
+  /* product grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:18px;padding-bottom:30px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);overflow:hidden;box-shadow:var(--shadow);transition:transform .22s,box-shadow .22s,background-color .3s,border-color .3s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 14px 32px rgba(30,22,80,.13)}
+  .card .art{position:relative;height:170px;overflow:hidden;background:linear-gradient(140deg,var(--accent-soft),var(--card))}
+  .card .art img{width:100%;height:100%;object-fit:cover;display:block;transition:.4s}
+  .card:hover .art img{transform:scale(1.05)}
+  .card .art .piccnt{position:absolute;top:12px;left:12px;font-size:.62rem;font-weight:700;letter-spacing:.05em;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:4px 9px;border-radius:7px}
+  .card .art .fav{position:absolute;bottom:10px;right:10px;width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:.18s}
+  .card .art .fav svg{width:16px;height:16px;stroke:var(--muted);fill:none;transition:.18s}
+  .card .art .fav.on svg{fill:#ff5b5b;stroke:#ff5b5b}
+  .card .body{padding:15px 16px 16px;display:flex;flex-direction:column;flex:1}
+  .card .name{font-weight:700;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .seller{font-size:.8rem;color:var(--muted);margin:5px 0 8px;display:flex;align-items:center;gap:6px}
+  .card .seller .v{width:13px;height:13px;border-radius:50%;background:var(--green);display:inline-grid;place-items:center}
+  .card .seller .v::after{content:"";width:5px;height:3px;border-left:1.7px solid #fff;border-bottom:1.7px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+  .card .rating{display:flex;align-items:center;gap:4px;font-size:.76rem;color:var(--muted);margin-bottom:12px}
+  .card .rating svg{width:12px;height:12px;fill:#ffc94d;stroke:none}
+  .card .bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
+  .card .price{font-size:1.2rem;font-weight:800}
+  .card .price small{color:var(--muted);font-weight:500;font-size:.74rem}
+  .card .buy{padding:10px 18px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:600;font-size:.88rem;transition:.2s}
+  .card .buy:hover{background:var(--accent-dark)}
+
+  /* view switch */
+  .view{display:none}
+  .view.active{display:block;animation:fadein .3s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  /* catalog card entrance animation (stagger) */
+  .grid .card{opacity:0}
+  .grid .card.enter{animation:cardIn .45s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+  .grid .card.exit{animation:cardOut .25s ease forwards}
+  @keyframes cardOut{to{opacity:0;transform:translateY(-14px) scale(.97)}}
+
+  /* SELL */
+  .sel-panel{display:grid;grid-template-columns:1fr 340px;gap:22px}
+  @media(max-width:860px){.sel-panel{grid-template-columns:1fr}}
+  .form-card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:26px;box-shadow:var(--shadow)}
+  .form-card h2{font-size:1.3rem;font-weight:800;margin-bottom:6px}
+  .form-card .m-sub{color:var(--muted);font-size:.9rem;margin-bottom:20px}
+  .field{margin-bottom:14px}
+  label{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:6px}
+  input,textarea{-webkit-appearance:none;appearance:none;width:100%;height:46px;padding:0 15px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:.93rem;transition:.2s;font-family:inherit}
+  textarea{height:auto;padding:13px 15px;resize:vertical;min-height:90px}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);background:var(--card);box-shadow:0 0 0 3px var(--accent-soft)}
+  .cust-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  .cseg{-webkit-appearance:none;appearance:none;height:46px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-weight:700;font-size:.9rem;cursor:pointer;transition:.18s;font-family:inherit;display:flex;align-items:center;justify-content:center}
+  .cseg:hover{border-color:var(--accent);color:var(--accent)}
+  .cseg.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(108,92,231,.35)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:520px){.row2{grid-template-columns:1fr}}
+  .md-btn{width:100%;height:50px;border:none;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:#fff;font-weight:700;font-size:.95rem;transition:.2s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 6px 18px rgba(108,92,231,.3)}
+  .md-btn:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(108,92,231,.4)}
+  .md-add .plus,.md-btn .plus{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;line-height:1;flex-shrink:0}
+  .cseg svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;vertical-align:-3px;margin-right:5px}
+  .hint-card{background:var(--accent-soft);border:1px solid rgba(108,92,231,.3);border-radius:var(--rad);padding:20px}
+  .hint-card h4{font-size:.95rem;margin-bottom:10px;color:var(--accent)}
+  .hint-card ul{list-style:none;display:grid;gap:9px}
+  .hint-card li{display:flex;gap:9px;font-size:.85rem;color:var(--ink);line-height:1.45}
+  .hint-card li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+  .uppics{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:10px;margin-bottom:12px}
+  .uppic{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--theme-bg-elem)}
+  .uppic img{width:100%;height:100%;object-fit:cover;display:block}
+  .uppic .up-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border:1px solid #fff;border-radius:50%;background:rgba(20,16,40,.6);color:#fff;font-size:.7rem;display:grid;place-items:center;cursor:pointer}
+  .md-add{width:100%;height:46px;border:1.5px dashed var(--accent);border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.92rem;cursor:pointer;transition:.18s}
+  .md-add:hover{background:var(--accent);color:#fff}
+  .im-pics{display:inline-flex;align-items:center;gap:6px;background:var(--theme-bg-elem);border:1px solid var(--line);border-radius:9px;padding:4px 10px;font-size:.76rem;color:var(--muted);margin-bottom:12px}
+
+  footer{margin-top:30px;border-top:1px solid var(--line);padding:24px 20px 36px;text-align:center;color:var(--muted);font-size:.82rem}
+  footer b{color:var(--accent)}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(20,16,40,.55);z-index:90;display:none;align-items:center;justify-content:center;padding:20px}
+  .overlay.show{display:flex}
+  @keyframes pop{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--ink);color:#fff;font-weight:600;padding:14px 26px;border-radius:12px;font-size:.92rem;transition:.4s;opacity:0;z-index:110;box-shadow:0 12px 34px rgba(0,0,0,.25)}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px;grid-column:1/-1}
+
+  /* item detail modal */
+  .item-modal{background:var(--card);border-radius:22px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.3);animation:pop .25s ease;position:relative}
+  .item-modal .im-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 24px 16px}
+  .item-modal .im-name{font-size:1.45rem;font-weight:800;line-height:1.2}
+  .item-modal .im-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .item-modal .im-tags span{font-size:.66rem;font-weight:700;letter-spacing:.04em;color:#fff;background:var(--accent);padding:4px 9px;border-radius:7px}
+  .item-modal .im-close{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--theme-bg-elem);font-size:1rem;color:var(--ink);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+  .item-modal .im-art{position:relative;height:260px;margin:0 24px;border-radius:16px;overflow:hidden}
+  .item-modal .im-art img{width:100%;height:100%;object-fit:cover;display:block}
+  .item-modal .im-body{padding:18px 24px 24px}
+  .item-modal .im-price-row{display:flex;align-items:center;justify-content:space-between;background:var(--accent-soft);border:1px solid rgba(108,92,231,.25);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+  .item-modal .im-price b{font-size:1.5rem;color:var(--accent)}
+  .item-modal .im-price small{color:var(--muted);font-size:.8rem}
+  .item-modal .im-stock{color:var(--green);font-weight:600;font-size:.9rem}
+  .item-modal .im-desc{color:var(--muted);font-size:.92rem;line-height:1.6;margin-bottom:16px}
+  .item-modal .im-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:480px){.item-modal .im-btns{grid-template-columns:1fr}}
+  .im-btn{padding:13px;border-radius:12px;border:none;font-weight:700;font-size:.92rem;transition:.2s;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  .im-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+  .im-btn.primary{background:var(--accent);color:#fff}
+  .im-btn.primary:hover{background:var(--accent-dark)}
+  .im-btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+  .im-btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .im-btn.full{grid-column:1/-1}
+  .im-btn .he{stroke:none}
+  .im-btn.fav-off{background:var(--card);color:var(--red);border:1.5px solid var(--line)}
+  .im-btn.fav-off:hover{border-color:var(--red);background:var(--bg)}
+  .im-btn.fav-off .he{fill:none;stroke:var(--red);stroke-width:1.9}
+  .im-btn.fav-on{background:var(--red);color:#fff;border:1.5px solid var(--red)}
+  .im-btn.fav-on:hover{filter:brightness(1.05)}
+  .im-btn.fav-on .he{fill:#fff}
+  .im-btn.primary{background:var(--accent);color:#fff;text-decoration:none}
+  .im-btn.primary:hover{background:var(--accent-dark)}
+
+  /* ================= MOBILE ================= */
+  body{padding-bottom:env(safe-area-inset-bottom,0)}
+
+  @media(max-width:760px){
+    /* ---- topbar: compact single-line header ---- */
+    .topbar-inner{height:auto;padding:0 0;flex-direction:column;gap:0}
+    .tb-row{flex-wrap:wrap;gap:10px;width:100%;padding:10px 14px 6px;align-items:center}
+    .logo{margin-right:auto}
+    .logo b{font-size:.95rem}
+    .tb-nav{margin-left:auto;order:3;gap:2px;padding:3px;border-radius:11px}
+    .tbn{padding:8px 14px;font-size:.82rem}
+    .tbn svg{width:15px;height:15px}
+    .tb-user{order:4}
+    .user-chip{padding:3px}
+    .user-chip .uc-av,.user-chip img{width:34px;height:34px}
+    .searchbar{order:5;flex:1 1 100%;max-width:none;margin:6px 14px 0;padding-bottom:10px}
+    .searchbar input{height:40px;background:var(--theme-bg-elem)}
+
+    /* ---- filters: clean horizontal pills ---- */
+    .fltbar{padding:0 14px 12px;display:block}
+    .fltbar h1{display:none}
+    .fltbar .count{display:block;font-size:.78rem;margin-bottom:8px}
+    .fltbar .segs{margin:0;width:100%;flex-wrap:nowrap;overflow-x:auto;gap:8px;background:none;border:none;padding:0;justify-content:flex-start;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .fltbar .segs::-webkit-scrollbar{display:none}
+    .fltbar .seg{flex:none;margin:0;padding:9px 16px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-size:.84rem;color:var(--muted)}
+    .fltbar .seg.active{border-color:var(--accent);background:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(108,92,231,.4)}
+
+    /* ---- catalog: 2-col grid like marketplaces ---- */
+    .grid{grid-template-columns:repeat(2,1fr);gap:12px;padding-bottom:110px}
+    .card .art{height:140px}
+    .card .body{padding:11px 12px}
+    .card .name{font-size:.92rem;white-space:normal;line-height:1.25}
+    .card .seller{font-size:.73rem;margin:4px 0 6px}
+    .card .rating{font-size:.7rem;margin-bottom:8px}
+    .card .price{font-size:1.05rem}
+    .card .buy{padding:9px 12px;font-size:.8rem}
+
+    /* ---- floating island: compact bottom bar ---- */
+    .float-isle{right:14px;bottom:14px;flex-direction:row;gap:8px;padding:8px;border-radius:20px}
+    .float-isle .fi-btn{width:50px;height:50px;border-radius:15px}
+
+    /* ---- sell form ---- */
+    .sel-panel{grid-template-columns:1fr}
+    .form-card{padding:20px}
+    .row2{grid-template-columns:1fr}
+    .cust-seg{grid-template-columns:1fr 1fr}
+    .cseg{height:48px}
+    .hint-card{margin-top:18px}
+  }
+
+  @media(min-width:761px) and (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+    .card .art{height:150px}
+  }
+
+  /* ---- item modal: bottom sheet on phones ---- */
+  @media(max-width:600px){
+    .overlay{align-items:flex-end;padding:0}
+    .item-modal{border-radius:20px 20px 0 0;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0)}
+    .item-modal .im-head{padding:18px 18px 14px}
+    .item-modal .im-name{font-size:1.3rem}
+    .item-modal .im-tags{margin-top:8px}
+    .item-modal .im-art{height:200px;margin:0 18px}
+    .item-modal .im-body{padding:18px 18px 24px}
+    .item-modal .im-btns{grid-template-columns:1fr;gap:12px}
+    .item-modal .im-btn{height:50px;font-size:1rem}
+    .overlay #authOverlay{max-width:100%}
+  }
+
+  /* small phones tighten */
+  @media(max-width:380px){
+    .tbn{padding:7px 10px;font-size:.8rem}
+    .logo b{display:none}
+    .grid{gap:12px}
+    .card .art{height:150px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="tb-row">
+      <a class="logo" href="#" onclick="view('catalog');return false"><span class="mark"><img src="avatar.jpg" alt="logo"></span><b>mont1g3m's shop</b></a>
+      <div class="tb-nav">
+        <button class="tbn active" data-v="catalog" onclick="view('catalog')">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+          Каталог
+        </button>
+        <button class="tbn" data-v="sell" onclick="view('sell')">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          Продать
+        </button>
+      </div>
+      <div class="searchbar" id="searchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <input type="text" id="search" placeholder="Поиск лотов: Chrome Luger, Frost Dragon...">
+      </div>
+      <div class="tb-user" id="userTop"></div>
+    </div>
+  </div>
+  <div class="fltbar" id="fltBar">
+    <h1 id="gridTitle">Каталог</h1>
+    <span class="count" id="gridCount"></span>
+    <div class="segs">
+      <button class="seg active" data-s="pops">По рейтингу</button>
+      <button class="seg" data-s="price">Дешевле</button>
+      <button class="seg" data-s="mm2">MM2</button>
+      <button class="seg" data-s="adopt">Adopt Me</button>
+      <button class="seg" data-s="acc">Аккаунты</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="layout-main">
+  <div id="authArea" style="display:none"></div>
+
+  <!-- CATALOG -->
+  <section class="view active" id="v-catalog">
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- SELL -->
+  <section class="view" id="v-sell">
+    <div class="sortbar"><div><h1>Продать предмет</h1><div class="count">Заполни по шагам — карточка появится в каталоге</div></div></div>
+    <div class="sel-panel">
+      <div class="form-card" id="sellFormCard">
+        <h2>Новое объявление</h2>
+        <div class="m-sub">Заполни форму и нажми «Опубликовать». Лот сразу попадёт в каталог.</div>
+        <form id="sellForm">
+          <div class="field"><label>1 · Название товара</label><input id="sName" placeholder="Chroma Luger" required></div>
+          <div class="row2">
+            <div class="field"><label>2 · Цена товара, ₽</label><input type="number" id="sPrice" placeholder="1000" min="1" required></div>
+            <div class="field"><label>4 · Режим (игра)</label>
+              <div class="cust-seg" id="sGameSeg">
+                <button type="button" class="cseg active" data-g="mm2"><svg viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6"/><circle cx="18.5" cy="5.5" r="2.5"/></svg> MM2</button>
+                <button type="button" class="cseg" data-g="adopt"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><circle cx="17" cy="12" r="3"/><path d="M3 20c.5-3 2.5-5 6-5s5.5 2 6 5"/></svg> Adopt Me</button>
+              </div>
+            </div>
+          </div>
+          <div class="field"><label>3 · Фотокарта товара (до 5 фото)</label>
+            <div class="uppics" id="uppics"></div>
+            <input type="file" id="sFiles" accept="image/*" multiple style="display:none">
+            <button type="button" class="md-add" onclick="document.getElementById('sFiles').click()"><svg viewBox="0 0 24 24" class="plus"><path d="M12 5v14M5 12h14"/></svg> Добавить фото</button>
+          </div>
+          <div class="field"><label>Описание (по желанию)</label><textarea id="sDesc" placeholder="Состояние, особенности, как передаём предмет..."></textarea></div>
+          <button class="md-btn" type="submit"><svg viewBox="0 0 24 24" class="plus"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg> Опубликовать в каталог</button>
+        </form>
+      </div>
+      <div class="hint-card">
+        <h4>Как продавать</h4>
+        <ul>
+          <li>Обычно сделка проходит в Telegram: продавец и покупатель договариваются напрямую.</li>
+          <li>Используй проверенных посредников для крупных сделок.</li>
+          <li>Не переводи и деньги, и предмет одновременно.</li>
+          <li>После сделки попроси покупателя оставить отзыв.</li>
+          <li>Продавец подтягивается из твоего профиля Telegram автоматически.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  </div>
+</div>
+
+<footer>
+  mont1g3m's shop — маркетплейс предметов MM2 и Adopt Me · честно, без скама
+</footer>
+
+<!-- item / write overlay -->
+<div class="overlay" id="ov" onclick="if(event.target===this)closeModal()"></div>
+
+<!-- floating action island -->
+<div class="float-isle">
+  <button class="fi-btn heart" id="favBtn" onclick="openFavs(event)" title="Избранное">
+    <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>
+    <span class="cnt" id="favCnt"></span>
+  </button>
+  <button class="fi-btn" onclick="toggleTheme(event)" title="Тема">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7.3 7.3 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let ITEMS=[];
+let favs=new Set();
+let filter='all', sort='pops', q='', openItemName=null;
+
+/* ---------- текущий юзер (из Telegram WebApp) ---------- */
+let curUser={name:'',photo:'',tgId:'guest'};
+function getTgUser(){
+  try{
+    const tg=window.Telegram&&window.Telegram.WebApp;
+    if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user){
+      const u=tg.initDataUnsafe.user;
+      const name=(u.username?('@'+u.username):(u.first_name||'mont1g3m'));
+      const tgId=String(u.id||'guest');
+      return {name,photo:(u.photo_url||''),tgId};
+    }
+  }catch(e){}
+  return null;
+}
+function apiHeader(){
+  return {'Content-Type':'application/json','X-Tg-User':curUser.tgId};
+}
+async function api(url,opts){
+  const r=await fetch(url,opts);
+  return r.json();
+}
+
+/* ---------- загрузка с бэка ---------- */
+async function loadData(){
+  try{
+    ITEMS=await api('/api/items');
+    const favList=await api('/api/favs',{headers:apiHeader()});
+    favs=new Set((Array.isArray(favList)?favList:[]).map(Number));
+  }catch(e){
+    toast('Не удалось загрузить каталог. Убедись, что сервер запущен.');
+  }
+  updateFavCnt();render();authArea();
+}
+
+function updateFavCnt(){const c=document.getElementById('favCnt');c.textContent=favs.size;c.classList.toggle('show',favs.size>0);}
+
+function authArea(){
+  const ut=document.getElementById('userTop');
+  const av=curUser.photo
+    ? `<img src="${curUser.photo}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+    : `<span class="uc-av">${(curUser.name.replace('@','')||'m')[0].toUpperCase()}</span>`;
+  if(ut)ut.innerHTML=`<span class="user-chip">${av}<span><div class="uc-name">${curUser.name}</div><div class="uc-sub">в Telegram</div></span></span>`;
+}
+
+/* ---------- навигация ---------- */
+function view(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));
+  document.querySelectorAll('.tbn').forEach(x=>x.classList.toggle('active',x.dataset.v===v));
+  const searchWrap=document.getElementById('searchWrap');
+  const fltBar=document.getElementById('fltBar');
+  const inCatalog=(v==='catalog');
+  if(searchWrap)searchWrap.style.display=inCatalog?'':'none';
+  if(fltBar)fltBar.style.display=inCatalog?'':'none';
+  document.getElementById('gridTitle').textContent=(filter==='favorite')?'Избранное':'Каталог';
+  if(inCatalog)render();
+  if(v==='sell')initUpload();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function openFavs(e){
+  if(e)e.preventDefault();
+  if(filter==='favorite')exitFav();
+  else{filter='favorite';sort='pops';view('catalog');setSortSeg();favBtnState();}
+}
+function exitFav(){filter='all';sort='pops';view('catalog');setSortSeg();favBtnState();}
+function favBtnState(){const b=document.getElementById('favBtn');b.classList.toggle('on',filter==='favorite');}
+
+/* ---------- helpers ---------- */
+function gameName(g){return g==='mm2'?'MM2':(g==='adopt'?'Adopt Me':(g==='acc'?'Аккаунты':'Игра'));}
+
+/* ---------- избранное ---------- */
+async function toggleFav(id,evt){
+  if(evt&&evt.stopPropagation)evt.stopPropagation();
+  id=Number(id);
+  try{
+    const res=await api('/api/favs/toggle',{method:'POST',headers:apiHeader(),body:JSON.stringify({item_id:id})});
+    if(res&&res.favorite!==undefined){
+      if(res.favorite)favs.add(id);else favs.delete(id);
+    }
+  }catch(e){toast('Не удалось обновить избранное');return;}
+  updateFavCnt();
+  if(filter==='favorite')render();
+  else document.querySelectorAll('.card').forEach(c=>{
+    const btn=c.querySelector('.fav');
+    if(btn&&Number(btn.dataset.item)===id)btn.classList.toggle('on',favs.has(id));
+  });
+  if(openItemName===id)openItem(id);
+}
+
+/* ---------- каталог ---------- */
+function filtered(){
+  let d=ITEMS.slice();
+  if(filter==='mm2')d=d.filter(x=>x.game==='mm2');
+  if(filter==='adopt')d=d.filter(x=>x.game==='adopt');
+  if(filter==='acc')d=d.filter(x=>x.game==='acc');
+  if(filter==='favorite')d=d.filter(x=>favs.has(Number(x.id)));
+  if(q)d=d.filter(x=>(x.name+x.seller+x.game).toLowerCase().includes(q.toLowerCase()));
+  if(sort==='price')d.sort((a,b)=>a.price-b.price);
+  else d.sort((a,b)=>b.id-a.id);
+  return d;
+}
+function render(){
+  const d=filtered();
+  document.getElementById('gridTitle').textContent=filter==='favorite'?'Избранное':'Каталог';
+  document.getElementById('gridCount').textContent=d.length+' лотов';
+  const g=document.getElementById('grid');
+  g.querySelectorAll('.card').forEach(c=>c.classList.add('exit'));
+  setTimeout(()=>{
+    if(!d.length){g.innerHTML='<div class="empty">Ничего не нашлось. Попробуй другой запрос или переключи фильтр.</div>';return;}
+    g.innerHTML=d.map((it,i)=>{
+      const on=favs.has(Number(it.id));
+      return `
+      <div class="card enter" style="animation-delay:${Math.min(i*40,500)}ms">
+        <div class="art">
+          <img src="${it.img||''}" alt="${it.name}" loading="lazy" onerror="this.style.display='none'">
+          ${it.photos>1?`<span class="piccnt">${it.photos} фото</span>`:''}
+          <button class="fav ${on?'on':''}" data-item="${it.id}" onclick="toggleFav(${it.id},event)" title="${on?'Убрать из избранного':'В избранное'}">
+            <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          </button>
+        </div>
+        <div class="body">
+          <div class="name">${it.name}</div>
+          <div class="seller"><span class="v"></span>${it.seller}</div>
+          <div class="bottom">
+            <div class="price">${it.price} <small>&#8381;</small></div>
+            <button class="buy" onclick="event.stopPropagation();openItem(${it.id})">Купить</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  },80);
+}
+
+/* ---------- карточка товара ---------- */
+function findItem(id){return ITEMS.find(x=>Number(x.id)===Number(id));}
+function openModal(html){
+  document.getElementById('ov').classList.add('show');
+  document.getElementById('ov').innerHTML=html;
+}
+function closeModal(){document.getElementById('ov').classList.remove('show');document.getElementById('ov').innerHTML='';openItemName=null;}
+function openItem(id){
+  openItemName=Number(id);
+  const it=findItem(openItemName);
+  if(!it)return;
+  const on=favs.has(Number(it.id));
+  const desc=it.desc||('Актуальное предложение от продавца '+it.seller+'. Проверенные сделки, отличное состояние, быстрый обмен в игре.');
+  openModal(`
+    <div class="item-modal">
+      <div class="im-head">
+        <div>
+          <div class="im-name">${it.name}</div>
+          ${it.photos>1?`<div class="im-tags"><span>${it.photos} фото</span></div>`:''}
+        </div>
+        <button class="im-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="im-art">
+        <img src="${it.img||''}" alt="${it.name}" onerror="this.style.display='none'">
+      </div>
+      <div class="im-body">
+        <div class="im-price-row">
+          <div class="im-price"><b>${it.price} ₽</b><br><small>без наценок, через Telegram</small></div>
+          <div class="im-stock">● в наличии</div>
+        </div>
+        <div class="im-desc"><b style="color:var(--ink)">Описание товара</b><br>${desc}</div>
+        <div class="im-btns">
+          <button class="im-btn ${on?'fav-on':'fav-off'} full" onclick="toggleFav(${it.id},event)">
+            <svg viewBox="0 0 24 24" class="he"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            ${on?'В избранном':'В избранное'}
+          </button>
+          <a class="im-btn primary full" href="https://t.me/${String(it.seller).replace('@','')}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Написать продавцу в Telegram
+          </a>
+        </div>
+      </div>
+    </div>`);
+}
+
+/* ---------- форма продажи ---------- */
+let sellPhotos=[];
+function renderUp(){
+  const box=document.getElementById('uppics');
+  if(!box)return;
+  box.innerHTML=sellPhotos.map((src,i)=>`
+    <div class="uppic"><img src="${src}"><button type="button" class="up-del" onclick="delPic(${i})">✕</button></div>`).join('')||'';
+}
+function delPic(i){sellPhotos.splice(i,1);renderUp();}
+function initUpload(){
+  const inp=document.getElementById('sFiles');
+  if(inp&&!inp.dataset.bound){
+    inp.dataset.bound='1';
+    inp.addEventListener('change',function(){
+      const remain=5-sellPhotos.length;
+      const files=[...this.files].slice(0,remain);
+      files.forEach(f=>{
+        const reader=new FileReader();
+        reader.onload=e=>{sellPhotos.push(e.target.result);renderUp();};
+        reader.readAsDataURL(f);
+      });
+      this.value='';
+      if(files.length<this.files.length&&this.files.length>0)toast('Максимум 5 фото');
+    });
+  }
+  renderUp();
+}
+document.querySelectorAll('#sGameSeg .cseg').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#sGameSeg .cseg').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+}));
+document.getElementById('sellForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  const name=document.getElementById('sName').value.trim();
+  const game=(document.querySelector('#sGameSeg .cseg.active')||{dataset:{g:'mm2'}}).dataset.g;
+  const price=Number(document.getElementById('sPrice').value);
+  const desc=document.getElementById('sDesc').value.trim();
+  if(!name||!price){toast('Заполни название и цену');return;}
+  if(!sellPhotos.length){toast('Добавь хотя бы одно фото товара');return;}
+  try{
+    const res=await api('/api/sell',{method:'POST',headers:apiHeader(),body:JSON.stringify({
+      name,game,price,desc,photos:sellPhotos,seller:curUser.name.replace('@','')
+    })});
+    if(!res.ok){toast(res.error||'Ошибка публикации');return;}
+    toast('Лот «'+name+'» опубликован!');
+    sellPhotos=[];this.reset();renderUp();
+    document.querySelectorAll('#sGameSeg .cseg')[0].classList.add('active');
+    document.querySelectorAll('#sGameSeg .cseg')[1].classList.remove('active');
+    await loadData();
+    view('catalog');
+  }catch(e){toast('Не удалось опубликовать');}
+});
+
+/* ---------- фильтры и поиск ---------- */
+document.querySelectorAll('.seg').forEach(s=>s.addEventListener('click',()=>{
+  document.querySelectorAll('.seg').forEach(x=>x.classList.remove('active'));
+  s.classList.add('active');
+  const k=s.dataset.s;
+  if(k==='mm2'){filter='mm2';sort='pops';}
+  else if(k==='adopt'){filter='adopt';sort='pops';}
+  else if(k==='acc'){filter='acc';sort='pops';}
+  else if(k==='price'){filter='all';sort='price';}
+  else{filter='all';sort='pops';}
+  render();favBtnState();
+}));
+function setSortSeg(){
+  document.querySelectorAll('.seg').forEach(x=>x.classList.remove('active'));
+  const map={pops:'pops',price:'price',mm2:'mm2',adopt:'adopt',acc:'acc'};
+  const target=(filter==='favorite')?'pops':(map[filter]||'pops');
+  document.querySelector(`.seg[data-s="${target}"]`)?.classList.add('active');
+}
+document.getElementById('search').addEventListener('input',e=>{q=e.target.value;render();});
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);}
+
+/* ---------- theme ---------- */
+const THEME_KEY='m3_theme';
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem(THEME_KEY,t);}
+function toggleTheme(){const cur=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';setTheme(cur);}
+
+/* ---------- init ---------- */
+(function(){
+  const tgUser=getTgUser();
+  if(tgUser)curUser={name:tgUser.name,photo:tgUser.photo,tgId:tgUser.tgId};
+  const saved=localStorage.getItem(THEME_KEY);
+  try{
+    const tg=window.Telegram&&window.Telegram.WebApp;
+    if(tg){tg.ready&&tg.ready();tg.expand&&tg.expand();if(tg.colorScheme||tg.themeParams)setTheme(tg.colorScheme==='dark'?'dark':'light');}
+  }catch(e){}
+  setTheme(saved||document.documentElement.getAttribute('data-theme')||'light');
+  initUpload();
+  authArea();
+  loadData();
+  favBtnState();
+})();
+window.addEventListener('resize',()=>{/* resize placeholder */});
+</script>
+</body>
+</html>

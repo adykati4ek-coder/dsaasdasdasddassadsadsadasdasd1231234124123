@@ -1,0 +1,104 @@
+import os
+import logging
+
+# загрузка .env
+def _load_env():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.isfile(env_path):
+        for line in open(env_path, encoding="utf-8"):
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, _, v = line.partition("=")
+                os.environ.setdefault(k.strip(), v.strip())
+
+_load_env()
+
+from aiogram import Bot, Dispatcher, Router, F
+from aiogram.filters import Command
+from aiogram.types import Message
+
+import db
+
+logger = logging.getLogger(__name__)
+router = Router()
+
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+@router.message(Command("start"))
+async def cmd_start(message: Message):
+    await message.answer(
+        "Привет! Это магазин mont1g3m's shop 💜\n\n"
+        "Команды:\n"
+        "/catalog — список товаров\n"
+        "/item ID — карточка товара\n"
+        "/sell — как продать\n\n"
+        "Полный каталог и покупка — в мини-аппе."
+    )
+
+
+@router.message(Command("catalog"))
+async def cmd_catalog(message: Message):
+    items = db.list_items()
+    if not items:
+        await message.answer("Каталог пуст.")
+        return
+    text = "Каталог:\n\n"
+    for it in items:
+        game = "MM2" if it["game"] == "mm2" else ("Adopt Me" if it["game"] == "adopt" else "Аккаунты")
+        text += f"· {it['name']} — {it['price']} ₽ ({game}) `{it['id']}`\n"
+    await message.answer(text, parse_mode="Markdown")
+
+
+@router.message(Command("item"))
+async def cmd_item(message: Message):
+    args = message.text.split()
+    if len(args) < 2:
+        await message.answer("Использование: /item ID")
+        return
+    try:
+        item_id = int(args[1])
+    except ValueError:
+        await message.answer("ID должен быть числом.")
+        return
+    item = db.get_item(item_id)
+    if not item:
+        await message.answer("Товар не найден.")
+        return
+    game = "MM2" if item["game"] == "mm2" else ("Adopt Me" if item["game"] == "adopt" else "Аккаунты")
+    text = (
+        f"<b>{item['name']}</b>\n"
+        f"Цена: {item['price']} ₽\n"
+        f"Игра: {game}\n"
+        f"Продавец: {item['seller']}\n"
+        f"┄┄┄┄┄┄┄┄┄\n"
+        f"{item['desc']}"
+    )
+    img_path = item["img"]
+    if img_path and os.path.isfile(os.path.join(BASE_DIR, img_path)):
+        from aiogram.types import FSInputFile
+        await message.answer_photo(FSInputFile(os.path.join(BASE_DIR, img_path)), caption=text, parse_mode="HTML")
+    else:
+        await message.answer(text, parse_mode="HTML")
+
+
+@router.message(Command("sell"))
+async def cmd_sell(message: Message):
+    await message.answer(
+        "Как продать:\n\n"
+        "1. Открой мини-апп и перейди в раздел «Продать»\n"
+        "2. Заполни название, цену, добавь фото и выбери игру\n"
+        "3. Нажми «Опубликовать» — лот появится в каталоге"
+    )
+
+
+async def run_bot_polling():
+    if not BOT_TOKEN:
+        logger.warning("BOT_TOKEN не задан — бот не запущен.")
+        return
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher()
+    dp.include_router(router)
+    logger.info("Бот запущен.")
+    await dp.start_polling(bot)
