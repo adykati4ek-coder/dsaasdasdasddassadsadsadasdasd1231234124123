@@ -99,13 +99,24 @@ async def _tg_avatar(tg_id: str) -> str | None:
 
 
 async def api_me(request: web.Request) -> web.Response:
-    """Данные текущего юзера: имя из заголовка + аватарка из Telegram."""
+    """Данные текущего юзера по id: ник из БД (бот сохранил при /start)."""
     user = get_user(request)
-    name = (request.headers.get("X-Tg-Name") or "").strip() or user
+    # авторитет — сохранённый при /start юзер
+    saved = db.get_user_by_id(user) if user != "guest" else None
+    if saved and saved.get("username"):
+        name = "@" + saved["username"]
+    else:
+        raw_name = (request.headers.get("X-Tg-Name") or "").strip()
+        try:
+            name = unquote(raw_name) if raw_name else ""
+        except Exception:
+            name = raw_name
+        if not name or name in ("guest", "@guest"):
+            name = saved.get("full_name") or saved.get("username") or user
     photo = ""
     if user != "guest" and user.isdigit():
         photo = await _tg_avatar(user) or ""
-    return web.json_response({"id": user, "name": name, "photo": photo})
+    return web.json_response({"id": user, "name": name, "username": (saved.get("username") if saved else ""), "photo": photo})
 
 
 async def api_favs(request: web.Request) -> web.Response:
@@ -131,8 +142,17 @@ async def api_sell(request: web.Request) -> web.Response:
 
     if not name or price <= 0 or not photos:
         return web.json_response({"error": "Заполни название, цену и добавь фото"}, status=400)
-    if not seller:
-        seller = "guest"
+    # продавец по id юзера; настоящий @ник берём из таблицы users (бот сохранил при /start)
+    user_id = get_user(request)
+    saved = db.get_user_by_id(user_id) if user_id != "guest" else None
+    if saved and saved.get("username"):
+        seller = "@" + saved["username"]
+    elif saved and saved.get("full_name"):
+        seller = saved["full_name"]
+    elif user_id and user_id != "guest":
+        seller = user_id
+    else:
+        seller = seller.strip() or "guest"
 
     img = photos[0]
     if img.startswith("data:image"):
