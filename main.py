@@ -21,6 +21,9 @@ from aiohttp import ClientSession
 import db
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Папка для загруженных изображений: на хостинге /app/data (DATA_DIR), локально — папка проекта.
+DATA_DIR = os.getenv("DATA_DIR", BASE_DIR)
+os.makedirs(DATA_DIR, exist_ok=True)
 
 IMAGE_EXT = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}
 
@@ -31,7 +34,10 @@ async def index(request: web.Request) -> web.Response:
 
 async def static_file(request: web.Request) -> web.Response:
     name = request.match_info["name"]
-    path = os.path.join(BASE_DIR, name)
+    # сперва ищем среди загруженных пользователям файлов, потом в базовой папке
+    path = os.path.join(DATA_DIR, name)
+    if not os.path.isfile(path):
+        path = os.path.join(BASE_DIR, name)
     if not os.path.isfile(path) or not name.replace("/", ""):
         raise web.HTTPNotFound()
     ext = os.path.splitext(path)[1].lower()
@@ -134,7 +140,7 @@ async def api_sell(request: web.Request) -> web.Response:
         ext = "png" if "png" in meta else "jpg"
         fname = "item-upload-{}_{}.{}".format(abs(hash(name + seller)) & 0xFFFF, int(time.time()) % 10000, ext)
         data_bytes = base64.b64decode(b64)
-        with open(os.path.join(BASE_DIR, fname), "wb") as f:
+        with open(os.path.join(DATA_DIR, fname), "wb") as f:
             f.write(data_bytes)
         img = fname
 
