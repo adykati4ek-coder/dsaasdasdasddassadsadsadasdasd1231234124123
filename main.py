@@ -153,7 +153,7 @@ async def api_sell(request: web.Request) -> web.Response:
         photos=len(photos),
         desc=desc,
     )
-    return web.json_response({"id": new_id, "ok": True})
+    return web.json_response({"id": new_id, "ok": True, "seller": seller})
 
 
 def make_app() -> web.Application:
