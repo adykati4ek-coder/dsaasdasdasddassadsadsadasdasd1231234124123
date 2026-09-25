@@ -40,8 +40,37 @@ def init_db():
                 PRIMARY KEY (user, item_id)
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                tg_id TEXT PRIMARY KEY,
+                username TEXT DEFAULT '',
+                full_name TEXT DEFAULT ''
+            )
+        """)
         conn.commit()
         conn.close()
+
+
+def upsert_user(tg_id: str, username: str = "", full_name: str = ""):
+    """Сохраняет/обновляет юзера при /start (или откуда угодно)."""
+    with _lock:
+        conn = get_conn()
+        conn.execute(
+            "INSERT INTO users (tg_id, username, full_name) VALUES (?,?,?) "
+            "ON CONFLICT(tg_id) DO UPDATE SET username=excluded.username, full_name=excluded.full_name",
+            (tg_id, username or "", full_name or ""),
+        )
+        conn.commit()
+        conn.close()
+
+
+def get_user_by_id(tg_id: str):
+    """Возвращает сохранённого юзера по id или None."""
+    with _lock:
+        conn = get_conn()
+        row = conn.execute("SELECT * FROM users WHERE tg_id=?", (tg_id,)).fetchone()
+        conn.close()
+        return dict(row) if row else None
 
 
 def list_items():
