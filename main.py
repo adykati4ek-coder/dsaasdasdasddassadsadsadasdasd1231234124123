@@ -16,6 +16,7 @@ def _load_env():
 _load_env()
 
 from aiohttp import web
+from aiohttp import ClientSession
 
 import db
 
@@ -53,6 +54,54 @@ async def api_item(request: web.Request) -> web.Response:
     return web.json_response(item)
 
 
+async def _tg_file_url(file_id: str) -> str | None:
+    """Возвращает прямую ссылку на файл Telegram (аватарку) или None."""
+    token = os.getenv("BOT_TOKEN", "")
+    if not token:
+        return None
+    try:
+        async with aiohttp.ClientSession() as s:
+            r = await s.get(f"https://api.telegram.org/bot{token}/getFile", params={"file_id": file_id}, timeout=15)
+            data = await r.json()
+            if data.get("ok"):
+                p = data["result"]["file_path"]
+                return f"https://api.telegram.org/file/bot{token}/{p}"
+    except Exception:
+        pass
+    return None
+
+
+async def _tg_avatar(tg_id: str) -> str | None:
+    """Достаёт первую аватарку юзера через Telegram API."""
+    token = os.getenv("BOT_TOKEN", "")
+    if not token:
+        return None
+    try:
+        async with aiohttp.ClientSession() as s:
+            r = await s.get(
+                f"https://api.telegram.org/bot{token}/getUserProfilePhotos",
+                params={"user_id": tg_id, "limit": 1},
+                timeout=15,
+            )
+            data = await r.json()
+            if data.get("ok") and data["result"]["photos"]:
+                file_id = data["result"]["photos"][0][-1]["file_id"]
+                return await _tg_file_url(file_id)
+    except Exception:
+        pass
+    return None
+
+
+async def api_me(request: web.Request) -> web.Response:
+    """Данные текущего юзера: имя из заголовка + аватарка из Telegram."""
+    user = get_user(request)
+    name = (request.headers.get("X-Tg-Name") or "").strip() or user
+    photo = ""
+    if user != "guest" and user.isdigit():
+        photo = await _tg_avatar(user) or ""
+    return web.json_response({"id": user, "name": name, "photo": photo})
+
+
 async def api_favs(request: web.Request) -> web.Response:
     user = get_user(request)
     return web.json_response(db.get_favs(user))
@@ -77,7 +126,7 @@ async def api_sell(request: web.Request) -> web.Response:
     if not name or price <= 0 or not photos:
         return web.json_response({"error": "Заполни название, цену и добавь фото"}, status=400)
     if not seller:
-        return web.json_response({"error": "Не удалось определить продавца"}, status=400)
+        seller = "guest"
 
     img = photos[0]
     if img.startswith("data:image"):
@@ -106,6 +155,7 @@ def make_app() -> web.Application:
     app.router.add_get("/", index)
     app.router.add_get("/api/items", api_items)
     app.router.add_get("/api/items/{id}", api_item)
+    app.router.add_get("/api/me", api_me)
     app.router.add_get("/api/favs", api_favs)
     app.router.add_post("/api/favs/toggle", api_fav_toggle)
     app.router.add_post("/api/sell", api_sell)
