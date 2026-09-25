@@ -407,9 +407,18 @@ function getTgUser(){
     const tg=window.Telegram&&window.Telegram.WebApp;
     if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user){
       const u=tg.initDataUnsafe.user;
-      const name=(u.username?('@'+u.username):(u.first_name||'mont1g3m'));
-      const tgId=String(u.id||'guest');
+      const name=(u.username?('@'+u.username):((u.first_name||u.last_name||'').trim()||'Игрок'));
+      const tgId=String(u.id||'');
       return {name,photo:(u.photo_url||''),tgId};
+    }
+  }catch(e){}
+  // резерв: Telegram может отдать юзера в query-параметре или в hash initData
+  try{
+    const us=new URLSearchParams(location.search).get('user');
+    if(us){
+      const u=JSON.parse(us);
+      const name=(u.username?('@'+u.username):((u.first_name||'').trim()||'Игрок'));
+      return {name,photo:(u.photo_url||''),tgId:String(u.id||'')};
     }
   }catch(e){}
   return null;
@@ -453,9 +462,31 @@ function authArea(){
 }
 
 /* ---------- навигация ---------- */
+function initSlideInd(wrap){
+  if(!wrap||wrap.dataset.slide)return;
+  wrap.dataset.slide='1';
+  const thumb=document.createElement('span');
+  thumb.className='slide-thumb';
+  wrap.insertBefore(thumb,wrap.firstChild);
+  requestAnimationFrame(()=>moveSlideInd(wrap));
+}
+function moveSlideInd(wrap){
+  if(!wrap)return;
+  const thumb=wrap.querySelector('.slide-thumb');
+  const act=wrap.querySelector('.active');
+  if(!thumb)return;
+  if(!act){thumb.style.transform='';thumb.style.opacity='0';return;}
+  const wr=wrap.getBoundingClientRect();
+  const ar=act.getBoundingClientRect();
+  thumb.style.opacity='1';
+  thumb.style.transform=`translate(${ar.left-wr.left}px,${ar.top-wr.top}px)`;
+  thumb.style.width=ar.width+'px';
+  thumb.style.height=ar.height+'px';
+}
 function view(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='v-'+v));
   document.querySelectorAll('.tbn').forEach(x=>x.classList.toggle('active',x.dataset.v===v));
+  requestAnimationFrame(()=>moveSlideInd(document.querySelector('.tb-nav')));
   const searchWrap=document.getElementById('searchWrap');
   const fltBar=document.getElementById('fltBar');
   const inCatalog=(v==='catalog');
@@ -624,9 +655,12 @@ document.getElementById('sellForm').addEventListener('submit',async function(e){
   const desc=document.getElementById('sDesc').value.trim();
   if(!name||!price){toast('Заполни название и цену');return;}
   if(!sellPhotos.length){toast('Добавь хотя бы одно фото товара');return;}
+  // продавец берём напрямую из Telegram (на случай, если curUser не успел записаться)
+  const tgNow=getTgUser();
+  const who=(tgNow&&(tgNow.name||tgNow.tgId)) || curUser.name || curUser.tgId || 'guest';
   try{
     const res=await api('/api/sell',{method:'POST',headers:apiHeader(),body:JSON.stringify({
-      name,game,price,desc,photos:sellPhotos,seller:curUser.name||curUser.tgId||'guest'
+      name,game,price,desc,photos:sellPhotos,seller:who
     })});
     if(!res.ok){toast(res.error||'Ошибка публикации');return;}
     toast('Лот «'+name+'» опубликован!');
@@ -682,7 +716,11 @@ function toggleTheme(){const cur=document.documentElement.getAttribute('data-the
   loadData();
   favBtnState();
 })();
-window.addEventListener('resize',()=>{/* resize placeholder */});
+window.addEventListener('resize',()=>{requestAnimationFrame(()=>moveSlideInd(document.querySelector('.tb-nav')));});
+function setupSliders(){
+  if(window.innerWidth>760)initSlideInd(document.querySelector('.tb-nav'));
+}
+setupSliders();
 </script>
 </body>
 </html>
