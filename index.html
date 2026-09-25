@@ -308,7 +308,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
         <input type="text" id="search" placeholder="Поиск лотов: Chrome Luger, Frost Dragon...">
       </div>
-      <div class="tb-user" id="userTop"></div>
+      <div class="tb-user" id="userTop" style="display:none"></div>
     </div>
   </div>
   <div class="fltbar" id="fltBar">
@@ -442,22 +442,10 @@ async function loadData(){
   }catch(e){
     toast('Не удалось загрузить каталог. Убедись, что сервер запущен.');
   }
-  // подтягиваем аватарку и имя юзера с бэка (не перетираем username/id)
-  try{
-    const me=await api('/api/me',{headers:apiHeader()});
-    if(me&&me.photo)curUser.photo=me.photo;
-  }catch(e){}
-  updateFavCnt();render();authArea();
+  updateFavCnt();render();
 }
 
 function updateFavCnt(){const c=document.getElementById('favCnt');c.textContent=favs.size;c.classList.toggle('show',favs.size>0);}
-
-function authArea(){
-  const ut=document.getElementById('userTop');
-  // ник: username (@ник), иначе — id
-  const dispName=curUser.username?('@'+curUser.username):(curUser.tgId&&curUser.tgId!=='guest'?curUser.tgId:'гость');
-  if(ut)ut.innerHTML=`<span class="uc-av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a29bfe);display:grid;place-items:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0">${(dispName.replace('@','')||'m')[0].toUpperCase()}</span><span class="uc-name">${dispName}</span>`;
-}
 
 /* ---------- навигация ---------- */
 function initSlideInd(wrap){
@@ -714,7 +702,6 @@ function toggleTheme(){const cur=document.documentElement.getAttribute('data-the
   }catch(e){}
   setTheme(saved||document.documentElement.getAttribute('data-theme')||'light');
   initUpload();
-  authArea();
   loadData();
   favBtnState();
 })();
