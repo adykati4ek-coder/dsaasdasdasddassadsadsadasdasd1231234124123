@@ -42,7 +42,7 @@ def open_app_kb() -> InlineKeyboardMarkup:
 async def cmd_start(message: Message):
     await message.answer(
         "Привет! Это магазин mont1g3m's shop 💜\n\n"
-        "Жми кнопку ниже, чтобы открыть каталог прямо здесь.",
+        "Жми кнопку ниже, чтобы открыть каталог",
         reply_markup=open_app_kb(),
     )
 
