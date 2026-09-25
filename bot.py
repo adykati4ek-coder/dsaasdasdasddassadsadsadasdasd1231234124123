@@ -15,7 +15,7 @@ _load_env()
 
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 import db
 
@@ -25,16 +25,25 @@ router = Router()
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# домен мини-аппа (можно переопределить через переменную окружения WEBAPP_URL)
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://bot-1790370212-3509-adykat.bothost.tech/")
+
+
+def open_app_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            text="🛍 Открыть магазин",
+            web_app=WebAppInfo(url=WEBAPP_URL),
+        )
+    ]])
+
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
     await message.answer(
         "Привет! Это магазин mont1g3m's shop 💜\n\n"
-        "Команды:\n"
-        "/catalog — список товаров\n"
-        "/item ID — карточка товара\n"
-        "/sell — как продать\n\n"
-        "Полный каталог и покупка — в мини-аппе."
+        "Жми кнопку ниже, чтобы открыть каталог прямо здесь.",
+        reply_markup=open_app_kb(),
     )
 
 
