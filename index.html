@@ -415,7 +415,7 @@ function getTgUser(){
   return null;
 }
 function apiHeader(){
-  return {'Content-Type':'application/json','X-Tg-User':curUser.tgId};
+  return {'Content-Type':'application/json','X-Tg-User':curUser.tgId,'X-Tg-Name':encodeURIComponent(curUser.name)};
 }
 async function api(url,opts){
   const r=await fetch(url,opts);
@@ -431,6 +431,12 @@ async function loadData(){
   }catch(e){
     toast('Не удалось загрузить каталог. Убедись, что сервер запущен.');
   }
+  // подтягиваем аватарку и имя юзера с бэка
+  try{
+    const me=await api('/api/me',{headers:apiHeader()});
+    if(me&&me.photo)curUser.photo=me.photo;
+    if(me&&me.name)curUser.name=me.name;
+  }catch(e){}
   updateFavCnt();render();authArea();
 }
 
@@ -438,10 +444,12 @@ function updateFavCnt(){const c=document.getElementById('favCnt');c.textContent=
 
 function authArea(){
   const ut=document.getElementById('userTop');
+  const dispName=curUser.name||curUser.tgId||'guest';
+  const letter=(dispName.replace('@','')||'m')[0].toUpperCase();
   const av=curUser.photo
     ? `<img src="${curUser.photo}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0">`
-    : `<span class="uc-av">${(curUser.name.replace('@','')||'m')[0].toUpperCase()}</span>`;
-  if(ut)ut.innerHTML=`<span class="user-chip">${av}<span><div class="uc-name">${curUser.name}</div><div class="uc-sub">в Telegram</div></span></span>`;
+    : `<span class="uc-av">${letter}</span>`;
+  if(ut)ut.innerHTML=`<span class="user-chip">${av}<span><div class="uc-name">${dispName}</div><div class="uc-sub">в Telegram</div></span></span>`;
 }
 
 /* ---------- навигация ---------- */
@@ -618,7 +626,7 @@ document.getElementById('sellForm').addEventListener('submit',async function(e){
   if(!sellPhotos.length){toast('Добавь хотя бы одно фото товара');return;}
   try{
     const res=await api('/api/sell',{method:'POST',headers:apiHeader(),body:JSON.stringify({
-      name,game,price,desc,photos:sellPhotos,seller:curUser.name.replace('@','')
+      name,game,price,desc,photos:sellPhotos,seller:curUser.name||curUser.tgId||'guest'
     })});
     if(!res.ok){toast(res.error||'Ошибка публикации');return;}
     toast('Лот «'+name+'» опубликован!');
