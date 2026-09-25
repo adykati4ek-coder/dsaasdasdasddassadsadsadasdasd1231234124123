@@ -407,9 +407,10 @@ function getTgUser(){
     const tg=window.Telegram&&window.Telegram.WebApp;
     if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user){
       const u=tg.initDataUnsafe.user;
-      const name=(u.username?('@'+u.username):((u.first_name||u.last_name||'').trim()||'Игрок'));
+      const username=u.username?String(u.username):'';
+      const name=(username?('@'+username):((u.first_name||u.last_name||'').trim()||'Игрок'));
       const tgId=String(u.id||'');
-      return {name,photo:(u.photo_url||''),tgId};
+      return {name,photo:(u.photo_url||''),tgId,username};
     }
   }catch(e){}
   // резерв: Telegram может отдать юзера в query-параметре или в hash initData
@@ -417,14 +418,15 @@ function getTgUser(){
     const us=new URLSearchParams(location.search).get('user');
     if(us){
       const u=JSON.parse(us);
-      const name=(u.username?('@'+u.username):((u.first_name||'').trim()||'Игрок'));
-      return {name,photo:(u.photo_url||''),tgId:String(u.id||'')};
+      const username=u.username?String(u.username):'';
+      const name=(username?('@'+username):((u.first_name||'').trim()||'Игрок'));
+      return {name,photo:(u.photo_url||''),tgId:String(u.id||''),username};
     }
   }catch(e){}
   return null;
 }
 function apiHeader(){
-  return {'Content-Type':'application/json','X-Tg-User':curUser.tgId,'X-Tg-Name':encodeURIComponent(curUser.name)};
+  return {'Content-Type':'application/json','X-Tg-User':curUser.tgId,'X-Tg-Name':encodeURIComponent(curUser.name),'X-Tg-Uname':encodeURIComponent(curUser.username||'')};
 }
 async function api(url,opts){
   const r=await fetch(url,opts);
@@ -440,11 +442,10 @@ async function loadData(){
   }catch(e){
     toast('Не удалось загрузить каталог. Убедись, что сервер запущен.');
   }
-  // подтягиваем аватарку и имя юзера с бэка
+  // подтягиваем аватарку и имя юзера с бэка (не перетираем username/id)
   try{
     const me=await api('/api/me',{headers:apiHeader()});
     if(me&&me.photo)curUser.photo=me.photo;
-    if(me&&me.name)curUser.name=me.name;
   }catch(e){}
   updateFavCnt();render();authArea();
 }
@@ -453,12 +454,9 @@ function updateFavCnt(){const c=document.getElementById('favCnt');c.textContent=
 
 function authArea(){
   const ut=document.getElementById('userTop');
-  const dispName=curUser.name||curUser.tgId||'guest';
-  const letter=(dispName.replace('@','')||'m')[0].toUpperCase();
-  const av=curUser.photo
-    ? `<img src="${curUser.photo}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0">`
-    : `<span class="uc-av">${letter}</span>`;
-  if(ut)ut.innerHTML=`<span class="user-chip">${av}<span><div class="uc-name">${dispName}</div><div class="uc-sub">в Telegram</div></span></span>`;
+  // ник: username (@ник), иначе — id
+  const dispName=curUser.username?('@'+curUser.username):(curUser.tgId&&curUser.tgId!=='guest'?curUser.tgId:'гость');
+  if(ut)ut.innerHTML=`<span class="uc-av" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a29bfe);display:grid;place-items:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0">${(dispName.replace('@','')||'m')[0].toUpperCase()}</span><span class="uc-name">${dispName}</span>`;
 }
 
 /* ---------- навигация ---------- */
@@ -655,9 +653,13 @@ document.getElementById('sellForm').addEventListener('submit',async function(e){
   const desc=document.getElementById('sDesc').value.trim();
   if(!name||!price){toast('Заполни название и цену');return;}
   if(!sellPhotos.length){toast('Добавь хотя бы одно фото товара');return;}
-  // продавец берём напрямую из Telegram (на случай, если curUser не успел записаться)
+  // продавец — по id юзера; ник (username) подставляем если есть
   const tgNow=getTgUser();
-  const who=(tgNow&&(tgNow.name||tgNow.tgId)) || curUser.name || curUser.tgId || 'guest';
+  let who=curUser.tgId||'guest';
+  if(tgNow){
+    if(tgNow.username)who=tgNow.username;
+    else if(tgNow.tgId)who=tgNow.tgId;
+  }
   try{
     const res=await api('/api/sell',{method:'POST',headers:apiHeader(),body:JSON.stringify({
       name,game,price,desc,photos:sellPhotos,seller:who
@@ -704,7 +706,7 @@ function toggleTheme(){const cur=document.documentElement.getAttribute('data-the
 /* ---------- init ---------- */
 (function(){
   const tgUser=getTgUser();
-  if(tgUser)curUser={name:tgUser.name,photo:tgUser.photo,tgId:tgUser.tgId};
+  if(tgUser)curUser={name:tgUser.name,photo:tgUser.photo,tgId:tgUser.tgId,username:tgUser.username||''};
   const saved=localStorage.getItem(THEME_KEY);
   try{
     const tg=window.Telegram&&window.Telegram.WebApp;
