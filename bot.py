@@ -40,6 +40,15 @@ def open_app_kb() -> InlineKeyboardMarkup:
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
+    # сохраняем юзера по id — чтобы фронт потом правильно определял продавца
+    u = message.from_user
+    if u:
+        full = " ".join(x for x in [u.first_name, u.last_name] if x)
+        db.upsert_user(
+            tg_id=str(u.id),
+            username=(u.username or ""),
+            full_name=full or "",
+        )
     await message.answer(
         "Привет! Это магазин mont1g3m's shop 💜\n\n"
         "Жми кнопку ниже, чтобы открыть каталог",
