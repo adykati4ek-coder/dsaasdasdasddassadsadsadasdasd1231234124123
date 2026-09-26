@@ -176,7 +176,7 @@ async def api_sell(request: web.Request) -> web.Response:
     return web.json_response({"id": new_id, "ok": True, "seller": seller})
 
 
-def make_app() -> web.Application:
+async def make_app() -> web.Application:
     app = web.Application()
     app.router.add_get("/", index)
     app.router.add_get("/api/items", api_items)
@@ -185,25 +185,22 @@ def make_app() -> web.Application:
     app.router.add_get("/api/favs", api_favs)
     app.router.add_post("/api/favs/toggle", api_fav_toggle)
     app.router.add_post("/api/sell", api_sell)
+    # webhook бота — регистрируем ДО catch-all статики
+    from bot import attach_webhook, WEBAPP_URL
+    await attach_webhook(app, WEBAPP_URL, path="/webhook")
     app.router.add_get("/{name:.*}", static_file)
     return app
 
 
-async def start_bot():
-    from bot import run_bot_polling
-    await run_bot_polling()
-
-
 async def main():
     db.init_db()
-    app = make_app()
+    app = await make_app()
     runner = web.AppRunner(app)
     await runner.setup()
     port = int(os.getenv("PORT", "8080"))
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
-    print(f"Веб-сервер запущен на http://0.0.0.0:{port}")
-    asyncio.create_task(start_bot())
+    print(f"Веб-сервер запущен на http://0.0.0.0:{port} (webhook бота встроен)")
     while True:
         await asyncio.sleep(3600)
 
