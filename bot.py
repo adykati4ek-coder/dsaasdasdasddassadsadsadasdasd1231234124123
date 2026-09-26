@@ -51,7 +51,7 @@ async def cmd_start(message: Message):
         )
     await message.answer(
         "Привет! Это магазин mont1g3m's shop 💜\n\n"
-        "Жми кнопку ниже, чтобы открыть каталог",
+        "Жми кнопку ниже, чтобы открыть каталог прямо здесь.",
         reply_markup=open_app_kb(),
     )
 
@@ -111,12 +111,26 @@ async def cmd_sell(message: Message):
     )
 
 
-async def run_bot_polling():
+async def attach_webhook(app, webhook_base: str, path: str = "/webhook"):
+    """Встраивает webhook бота в существующий aiohttp-сервер.
+
+    webhook_base — внешний домен (уже идёт проксирование апдейтов на app),
+    path — путь, на котором бот будет принимать апдейты.
+    """
     if not BOT_TOKEN:
         logger.warning("BOT_TOKEN не задан — бот не запущен.")
-        return
-    bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher()
+        return None, None
+    from aiogram.webhook.aiohttp_server import setup_application
+    from aiogram import Bot as _Bot, Dispatcher as _DP
+
+    bot = _Bot(token=BOT_TOKEN)
+    dp = _DP()
     dp.include_router(router)
-    logger.info("Бот запущен.")
-    await dp.start_polling(bot)
+
+    full = webhook_base.rstrip("/") + path
+    setup_application(app, dp, bot=bot)
+    # регистрируем webhook у Telegram (убираем старое)
+    await bot.delete_webhook()
+    await bot.set_webhook(full)
+    logger.info("Бот подключён к webhook: %s", full)
+    return bot, dp
