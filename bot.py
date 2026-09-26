@@ -111,11 +111,11 @@ async def cmd_sell(message: Message):
     )
 
 
-async def attach_webhook(app, webhook_base: str, path: str = "/webhook"):
+async def attach_webhook(app, webhook_base: str):
     """Встраивает webhook бота в существующий aiohttp-сервер.
 
-    webhook_base — внешний домен (уже идёт проксирование апдейтов на app),
-    path — путь, на котором бот будет принимать апдейты.
+    aiogram по умолчанию слушает путь /webhook/bot<TOKEN> — на этот же путь
+    и ставим webhook в Telegram.
     """
     if not BOT_TOKEN:
         logger.warning("BOT_TOKEN не задан — бот не запущен.")
@@ -127,9 +127,9 @@ async def attach_webhook(app, webhook_base: str, path: str = "/webhook"):
     dp = _DP()
     dp.include_router(router)
 
+    path = "/webhook/bot" + BOT_TOKEN
     full = webhook_base.rstrip("/") + path
     setup_application(app, dp, bot=bot)
-    # регистрируем webhook у Telegram (убираем старое)
     await bot.delete_webhook()
     await bot.set_webhook(full)
     logger.info("Бот подключён к webhook: %s", full)
