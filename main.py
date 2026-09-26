@@ -187,7 +187,7 @@ async def make_app() -> web.Application:
     app.router.add_post("/api/sell", api_sell)
     # webhook бота — регистрируем ДО catch-all статики
     from bot import attach_webhook, WEBAPP_URL
-    await attach_webhook(app, WEBAPP_URL, path="/webhook")
+    await attach_webhook(app, WEBAPP_URL)
     app.router.add_get("/{name:.*}", static_file)
     return app
 
